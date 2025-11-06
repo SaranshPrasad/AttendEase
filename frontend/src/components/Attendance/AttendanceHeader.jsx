@@ -15,7 +15,7 @@ export default function AttendanceHeader({
       const storedSession = localStorage.getItem("active-session");
       if (storedSession) {
           const activeSession = JSON.parse(storedSession);
-          console.log(activeSession);
+          // console.log(activeSession);
             setLiveSessions(activeSession.session); 
           }
        
@@ -29,7 +29,7 @@ export default function AttendanceHeader({
     localStorage.removeItem("active-session");
     navigate('/facultyDashboard')
   }
-  console.log("Active Sessions : ",liveSessions);
+  // console.log("Active Sessions : ",liveSessions);
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div className="flex items-center gap-4">
@@ -42,7 +42,7 @@ export default function AttendanceHeader({
           </h1>
           <p className="text-gray-600 text-lg mt-1">
             {activeSession
-              ? `Session running for ${selectedClass?.slots[0].subject.name} By ${selectedClass?.slots[0].faculty.name}`
+              ? `Session running for ${liveSessions?.subject?.name} By ${liveSessions?.faculty?.name}`
               : "Select a class to start a new session"}
           </p>
         </div>

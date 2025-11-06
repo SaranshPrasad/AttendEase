@@ -7,7 +7,6 @@ export const getFaculty = async () =>{
     }else{
         const res = await axios.get('http://localhost:5001/admin/view/faculty', {withCredentials:true});
         if(res){
-            // console.log(res.data);
             return res?.data.facultyData;
         }
     }

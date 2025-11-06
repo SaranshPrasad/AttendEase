@@ -6,7 +6,7 @@ import { Clock, ExternalLink, Users, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
-import { createPageUrl } from "@/utils";
+
 
 export default function ActiveSessions({ sessions, isLoading }) {
 
@@ -118,13 +118,8 @@ export default function ActiveSessions({ sessions, isLoading }) {
               No Active Sessions
             </h3>
             <p className="text-gray-500 mb-4">
-              Start taking attendance to see active sessions here
+              No classes are available to create attendance session, Ask Admin for help.
             </p>
-            <Link to={createPageUrl("Attendance")}>
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-                Start New Session
-              </Button>
-            </Link>
           </div>
         )}
       </CardContent>

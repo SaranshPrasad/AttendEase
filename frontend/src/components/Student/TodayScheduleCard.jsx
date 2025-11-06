@@ -91,6 +91,7 @@ import { Clock, MapPin, BookOpen, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TodayScheduleCard({ schedule = [], isLoading }) {
+  console.log(" Schedulu :",schedule);
   if (isLoading) {
     return (
       <Card className="bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg">

@@ -1,24 +1,76 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Users, Clock } from "lucide-react";
+import { Users, Clock, Loader2 } from "lucide-react";
+import axios from "axios";
 
-export default function AttendanceSummary({
-  expectedCount,
-  presentCount,
-  session,
-}) {
+export default function AttendanceSummary({ session }) {
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [presentStudents, setPresentStudents] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const sessionId = session?.session?._id;
+  const semester = session?.session?.semester;
+
+  // Fetch total students of the semester
+  const fetchTotalStudents = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5001/student/view/${semester}`,
+        { withCredentials: true }
+      );
+      setTotalStudents(res.data.totalStudents || 0);
+    } catch (error) {
+      console.error("Error fetching total students:", error);
+    }
+  };
+
+  // Fetch live attendance (present students count)
+  const fetchPresentStudents = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:5001/attendance/live/${sessionId}`,
+        { withCredentials: true }
+      );
+      setPresentStudents(data.presentStudents?.length || 0);
+    } catch (error) {
+      console.error("Error fetching present students:", error);
+    }
+  };
+
+  // Initialize and auto-refresh every 5 seconds
+  useEffect(() => {
+    if (!sessionId || !semester) return;
+
+    const init = async () => {
+      setIsLoading(true);
+      await fetchTotalStudents();
+      await fetchPresentStudents();
+      setIsLoading(false);
+    };
+
+    init();
+    const interval = setInterval(fetchPresentStudents, 5000);
+    return () => clearInterval(interval);
+  }, [sessionId, semester]);
+
+  const total = totalStudents || 0;
   const attendancePercentage =
-    expectedCount > 0 ? (presentCount / expectedCount) * 100 : 0;
+    total > 0 ? (presentStudents / total) * 100 : 0;
 
   return (
     <Card className="bg-white/70 backdrop-blur-sm border border-gray-100 shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-gray-900">Session Summary</h3>
+          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            Session Summary {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+          </h3>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Clock className="w-4 h-4" />
-            <span>{session.session_time}</span>
+            <span>
+              {session.session?.start_time} - {session.session?.end_time}
+            </span>
           </div>
         </div>
 
@@ -28,10 +80,13 @@ export default function AttendanceSummary({
               <Users className="w-4 h-4" /> Attendance
             </span>
             <span className="font-bold text-purple-700 text-lg">
-              {presentCount} / {expectedCount}
+              {isLoading ? "Loading..." : `${presentStudents} / ${total}`}
             </span>
           </div>
           <Progress value={attendancePercentage} className="h-3" />
+          <p className="text-sm text-gray-600 mt-2 text-center">
+            {attendancePercentage.toFixed(1)}% Present
+          </p>
         </div>
       </CardContent>
     </Card>

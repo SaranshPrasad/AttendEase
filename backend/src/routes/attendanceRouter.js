@@ -9,41 +9,52 @@ const userAuth = require("../middleware/auth");
 
 attendanceRouter.use(express.json());
 
-// attendanceRouter.get("/active", userAuth, async (req,res) => {
+// attendanceRouter.get("/active", userAuth, async (req, res) => {
 //   try {
-//     const {role} = req.user;
-//     if(role === 'student'){
-//       const response = await AttendanceSession.find();
-//       if(response.length > 0){
-//         res.status(200).json({message:"Attendance Sessions fetched : ",response});
-//       }else{
-//         res.status(200).json({message:"Attendance Sessions Dont have any values.. : ",response});
+//     const { role } = req.user;
+
+//     if (role === "student") {
+//       const response = await AttendanceSession.find()
+//         .populate("faculty", "name")  
+//         .populate("subject", "name")
+//         .lean();
+      
+//       console.log(response);
+//       if (response.length > 0 && response.status === 'active') {
+//         res.status(200).json({ message: "Attendance Sessions fetched", response });
+//       } else {
+//         res.status(200).json({ message: "No active sessions", response });
 //       }
-//     }else{
-//       throw new Error("Student role required to fetch data of active sessions.....");
+//     } else {
+//       throw new Error("Student role required to fetch active sessions");
 //     }
 //   } catch (error) {
-//     res.status(404).json({message:"Something went wrong : ", error});
+//     res.status(404).json({ message: "Something went wrong", error: error.message });
 //   }
 // });
 attendanceRouter.get("/active", userAuth, async (req, res) => {
   try {
     const { role } = req.user;
 
-    if (role === "student") {
-      const response = await AttendanceSession.find()
-        .populate("faculty", "name")  // only get faculty name
-        .populate("subject", "name")  // only get course name
-        .lean();
-
-      if (response.length > 0) {
-        res.status(200).json({ message: "Attendance Sessions fetched", response });
-      } else {
-        res.status(200).json({ message: "No active sessions", response });
-      }
-    } else {
+    if (role !== "student") {
       throw new Error("Student role required to fetch active sessions");
     }
+
+    // Fetch all sessions and populate faculty and subject details
+    const sessions = await AttendanceSession.find()
+      .populate("faculty", "name")
+      .populate("subject", "name")
+      .lean();
+
+    // Filter only active sessions
+    const activeSessions = sessions.filter((session) => session.status === "active");
+
+    if (activeSessions.length > 0) {
+      res.status(200).json({ message: "Active attendance sessions fetched", sessions: activeSessions });
+    } else {
+      res.status(200).json({ message: "No active sessions", sessions: [] });
+    }
+
   } catch (error) {
     res.status(404).json({ message: "Something went wrong", error: error.message });
   }
@@ -183,6 +194,37 @@ attendanceRouter.get("/session/:sessionId/stats", async (req, res) => {
   }
 });
 
+attendanceRouter.get("/live/:sessionId", userAuth, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
 
+    // Ensure the session exists
+    const session = await AttendanceSession.findById(sessionId)
+      .populate("faculty", "name")
+      .populate("subject", "name")
+      .lean();
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    // Fetch attendance records for that session
+    const records = await AttendanceRecord.find({ session: sessionId })
+      .populate("student", "name student_id")
+      .lean();
+
+    const presentStudents = records.filter(r => r.status === "present").map(r => r.student);
+    const absentStudents = records.filter(r => r.status === "absent").map(r => r.student);
+
+    res.status(200).json({
+      message: "Live attendance fetched successfully",
+      session,
+      presentStudents,
+      absentStudents,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching live attendance", error: error.message });
+  }
+});
 
 module.exports = attendanceRouter;
