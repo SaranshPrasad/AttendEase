@@ -20,8 +20,8 @@ adminRouter.use(cookieParser());
 // Student Routes
 adminRouter.get("/view/students", userAuth, async (req, res) => {
   try {
-    const { _id, role } = req.user;
-    if (role === "admin") {
+    // const { _id, role } = req.user;
+    // if (role === "admin") {
       const studentData = await MasterStudent.find();
       const student = await Student.find();
       if (!studentData || studentData.length == 0) {
@@ -34,9 +34,9 @@ adminRouter.get("/view/students", userAuth, async (req, res) => {
           studentData,
           student,
         });
-    } else {
-      throw new Error("Admin not verified !");
-    }
+    // } else {
+    //   throw new Error("Admin not verified !");
+    // }
   } catch (error) {
     res
       .status(400)

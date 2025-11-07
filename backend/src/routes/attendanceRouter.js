@@ -227,4 +227,78 @@ attendanceRouter.get("/live/:sessionId", userAuth, async (req, res) => {
   }
 });
 
+
+
+attendanceRouter.get("/all/sessions",userAuth, async (req,res) => {
+  try {
+    const sessions = await AttendanceSession.find();
+    if(sessions.length > 0){
+      res.status(200).json({message:"Data fetched....", sessions, totalSessions:sessions.length});
+    }else{
+      res.status(200).json({message:"Not enough data to display..", sessions});
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching live attendance", error: error.message });
+  }
+});
+
+attendanceRouter.get("/all/sessions/:courseId", userAuth, async(req,res) => {
+  try {
+    const {courseId} = req.params;
+    const sessions = await AttendanceSession.find({subject:courseId});
+    if(sessions.length > 0){
+      res.status(200).json({message:"Data fetched....", sessions});
+    }else{
+      res.status(200).json({message:"Not enough data to display..", sessions});
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching live attendance", error: error.message });
+    
+  }
+})
+
+attendanceRouter.get("/sessions/:semester", userAuth, async(req,res) => {
+  try {
+    const {semester} = req.params;
+    const sessions = await AttendanceSession.find({semester:semester});
+    if(sessions.length > 0){
+      res.status(200).json({message:"Data fetched....", sessions});
+    }else{
+      res.status(200).json({message:"Not enough data to display..", sessions});
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching live attendance", error: error.message });
+    
+  }
+});
+
+attendanceRouter.get("/sessions/all/done/:faculty", userAuth, async(req,res) => {
+    try {
+    const {faculty} = req.params;
+    const sessions = await AttendanceSession.find({faculty:faculty});
+    if(sessions.length > 0){
+      res.status(200).json({message:"Data fetched....", sessions});
+    }else{
+      res.status(200).json({message:"Not enough data to display..", sessions});
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching live attendance", error: error.message });
+    
+  }
+});
+
+attendanceRouter.get("/total/marked/present", userAuth, async (req,res) => {
+  try {
+    const sessions = await AttendanceRecord.find();
+    if(sessions.length > 0){
+      res.status(200).json({message:"Data fetched....", sessions});
+    }else{
+      res.status(200).json({message:"Not enough data to display..", sessions});
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching live attendance", error: error.message });
+  }
+});
+
+
 module.exports = attendanceRouter;

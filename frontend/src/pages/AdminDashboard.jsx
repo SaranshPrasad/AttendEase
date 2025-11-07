@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import { Student } from "@/entities/Student";
-// import { Course } from "@/entities/Course";
-// import { AttendanceSession } from "@/entities/AttendanceSession";
-// import { User } from "@/entities/User";
+
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
@@ -22,33 +19,26 @@ import { adminQuickActions } from "../lib/adminQuickActions";
 import { getStudents } from "../lib/getStudentData";
 import { getFaculty } from "../lib/getFacultyData";
 import { getCourses } from "../lib/getCourses";
+import axios from "axios";
 export default function AdminDashboard() {
-  // const [stats, setStats] = useState({
-  //   totalStudents: 0,
-  //   totalFaculty: 0,
-  //   totalCourses: 0,
-  //   avgAttendance: 0,
-  // });
+
   const [recentSessions, setRecentSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalFaculty, setTotalFaculty]= useState(0);
   const [totalCourses, setTotalCourses] = useState(0);
+  const [avgAttendance, setAvgAttendance] = useState(0);
+  const [totalSessions, setTotalSessions] = useState(0);
 
   useEffect(() => {
     loadDashboardData();
     
   }, []);
-  console.log(totalStudents);
+  
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      // const [students, users, courses, sessions] = await Promise.all([
-      //   Student.list(),
-      //   User.list(),
-      //   Course.list(),
-      //   AttendanceSession.list("-created_date", 10),
-      // ]);
+      
       const students = await getStudents();
       
       if(students){
@@ -67,30 +57,47 @@ export default function AdminDashboard() {
         setIsLoading(false);
       }
 
-      // const facultyUsers = users.filter(
-      //   (u) => u.role === "user" || u.role === "admin"
-      // );
-
-      // const totalExpected = sessions.reduce(
-      //   (sum, session) => sum + (session.total_students_expected || 0),
-      //   0
-      // );
-      // const totalPresent = sessions.reduce(
-      //   (sum, session) => sum + (session.total_present || 0),
-      //   0
-      // );
-      // const avgAttendance =
-      //   totalExpected > 0 ? (totalPresent / totalExpected) * 100 : 0;
+    
+// ✅ Fetch sessions and attendance records
+    const { data: sessions } = await axios.get(
+      "http://localhost:5001/attendance/all/sessions",
+      { withCredentials: true }
+    );
 
 
-      // setRecentSessions(sessions.slice(0, 5));
+
+    const { data: attendanceRecords } = await axios.get(
+      "http://localhost:5001/attendance/total/marked/present",
+      { withCredentials: true }
+    );
+
+    // ✅ Defensive checks
+    
+    const totalSessions = sessions.sessions?.length || 0;
+    setTotalSessions(totalSessions);
+    const totalPresentRecords = attendanceRecords.sessions?.length || 0;
+    
+    // ✅ Average Attendance = total present / (students × sessions)
+    const averageAttendance =
+      students.length > 0 && totalSessions > 0
+        ? Math.round(
+            (totalPresentRecords / (students.length * totalSessions)) * 100
+          )
+        : 0;
+    
+
+    setAvgAttendance(averageAttendance);
+
+
     } catch (error) {
       console.error("Error loading admin dashboard data:", error);
     }
     setIsLoading(false);
   };
 
- 
+ const calculateAvgAttendance = async () => {
+
+ }
 
   return (
     <div className="p-4 md:p-8 min-h-screen">
@@ -128,7 +135,7 @@ export default function AdminDashboard() {
           />
           <DashboardStats
             title="Avg. Attendance"
-            value={0}
+            value={avgAttendance+"%"}
             icon={TrendingUp}
             gradient="from-orange-500 to-orange-600"
             isLoading={isLoading}

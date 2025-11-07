@@ -1,13 +1,14 @@
-import React from "react";
+
+import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, TrendingDown, TrendingUp } from "lucide-react";
 
 export default function StudentPerformance({
-  students,
-  records,
-  sessions,
+  students = [],
+  records = [],
+  sessions = [],
   isLoading,
 }) {
   if (isLoading) {
@@ -38,26 +39,37 @@ export default function StudentPerformance({
     );
   }
 
-  // Calculate attendance rate for each student
-  const studentStats = students.map((student) => {
-    const studentRecords = records.filter((r) => r.student_id === student.id);
+  // 🧮 Compute stats for each student (even if not in records)
+  const studentStats = useMemo(() => {
     const totalSessions = sessions.length;
-    const attendanceRate =
-      totalSessions > 0 ? (studentRecords.length / totalSessions) * 100 : 0;
 
-    return {
-      ...student,
-      attendanceCount: studentRecords.length,
-      attendanceRate: Math.round(attendanceRate),
-      totalSessions,
-    };
-  });
+    return students.map((student) => {
+      // Find only PRESENT records for this student
+      const studentRecords = records.filter(
+        (r) => r.student === student._id && r.status === "present"
+      );
 
-  // Sort by attendance rate (lowest first for attention)
-  const sortedStudents = studentStats.sort(
-    (a, b) => a.attendanceRate - b.attendanceRate
-  );
+      const attendedSessions = studentRecords.length;
+      const attendanceRate =
+        totalSessions > 0 ? (attendedSessions / totalSessions) * 100 : 0;
 
+      return {
+        ...student,
+        attendanceCount: attendedSessions,
+        attendanceRate: Math.round(attendanceRate),
+        totalSessions,
+      };
+    });
+  }, [students, records, sessions]);
+
+  // 🔢 Sort by attendance rate (lowest → highest)
+  const sortedStudents = useMemo(
+  () => [...studentStats].sort((a, b) => b.attendanceRate - a.attendanceRate),
+  [studentStats]
+);
+
+
+  // 🏷️ Helper to decide performance badge
   const getPerformanceBadge = (rate) => {
     if (rate >= 90)
       return {
@@ -91,30 +103,29 @@ export default function StudentPerformance({
       </CardHeader>
       <CardContent>
         <div className="space-y-4 max-h-96 overflow-y-auto">
-          {sortedStudents.slice(0, 10).map((student) => {
+          {sortedStudents.map((student) => {
             const performance = getPerformanceBadge(student.attendanceRate);
             const IconComponent = performance.icon;
 
             return (
               <div
-                key={student.id}
+                key={student._id}
                 className="flex items-center justify-between p-3 border border-gray-100 rounded-lg"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-blue-600">
-                      {student.full_name.charAt(0)}
+                      {student.name?.charAt(0)?.toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
-                      {student.full_name}
-                    </p>
+                    <p className="font-medium text-gray-900">{student.name}</p>
                     <p className="text-sm text-gray-500">
                       {student.attendanceCount}/{student.totalSessions} sessions
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-lg">
                     {student.attendanceRate}%
@@ -132,3 +143,4 @@ export default function StudentPerformance({
     </Card>
   );
 }
+

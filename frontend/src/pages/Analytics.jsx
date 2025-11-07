@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-// import { AttendanceSession } from "@/entities/AttendanceSession";
-// import { AttendanceRecord } from "@/entities/AttendanceRecord";
-// import { Student } from "@/entities/Student";
-// import { Course } from "@/entities/Course";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import axios from "axios";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -22,8 +19,8 @@ import DepartmentStats from "../components/analytics/DepartmentStats";
 export default function AnalyticsPage() {
   const [sessions, setSessions] = useState([]);
   const [records, setRecords] = useState([]);
-  const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedCourse, setSelectedCourse] = useState("all");
@@ -33,84 +30,116 @@ export default function AnalyticsPage() {
   }, []);
 
   const loadAnalyticsData = async () => {
-    setIsLoading(true);
     try {
-      const [sessionsData, recordsData, studentsData, coursesData] =
-        await Promise.all([
-          AttendanceSession.list("-created_date"),
-          AttendanceRecord.list("-created_date"),
-          Student.list(),
-          Course.list(),
-        ]);
+      setIsLoading(true);
 
-      setSessions(sessionsData);
-      setRecords(recordsData);
-      setStudents(studentsData);
-      setCourses(coursesData);
+      const token = localStorage.getItem("token");
+
+      // Fetch attendance sessions and records
+      const [sessionRes, recordRes, courseRes, studentRes] = await Promise.all([
+        axios.get("http://localhost:5001/attendance/all/sessions", {
+          withCredentials: true,
+        }),
+        axios.get("http://localhost:5001/attendance/total/marked/present", {
+          withCredentials: true,
+        }),
+        axios.get("http://localhost:5001/admin/view/courses", {
+          withCredentials: true,
+        }),
+        axios.get("http://localhost:5001/admin/view/students", {
+          withCredentials: true,
+        }),
+      ]);
+
+      setSessions(sessionRes.data.sessions || []);
+      setRecords(recordRes.data.sessions || []);
+      setCourses(courseRes.data.courses || []);
+      setStudents(studentRes.data.studentData || []);
     } catch (error) {
       console.error("Error loading analytics data:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const getFilteredData = () => {
-    let filteredSessions = sessions;
-    let filteredRecords = records;
+    let filteredSessions = [...sessions];
+    let filteredRecords = [...records];
+    let filteredStudents = [...students];
 
-    // Filter by course
+    // 🟢 Course filter
     if (selectedCourse !== "all") {
-      filteredSessions = sessions.filter((s) => s.class_id === selectedCourse);
-      const sessionIds = filteredSessions.map((s) => s.id);
-      filteredRecords = records.filter((r) =>
-        sessionIds.includes(r.session_id)
+      // Find selected course details
+      const selectedCourseData = courses.find((c) => c._id === selectedCourse);
+
+      // Filter sessions linked to that course
+      filteredSessions = filteredSessions.filter(
+        (s) => s.subject === selectedCourse
       );
+
+      const sessionIds = filteredSessions.map((s) => s._id);
+      filteredRecords = filteredRecords.filter((r) =>
+        sessionIds.includes(r.session)
+      );
+
+      // 🟢 Now filter students based on course semester
+      if (selectedCourseData && selectedCourseData.semester) {
+        filteredStudents = filteredStudents.filter(
+          (stu) => stu.semester === selectedCourseData.semester
+        );
+      }
     }
 
-    // Filter by time period
+    // 🟢 Time period filter
     const now = new Date();
-    let startDate;
+    let startDate = new Date(0);
+    let endDate = new Date(now);
 
-    switch (selectedPeriod) {
-      case "week":
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case "month":
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case "semester":
-        startDate = new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        startDate = new Date(0);
+    if (selectedPeriod === "week") {
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - 7);
+    } else if (selectedPeriod === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    } else if (selectedPeriod === "semester") {
+      startDate = new Date(now);
+      startDate.setMonth(now.getMonth() - 4);
     }
 
-    filteredSessions = filteredSessions.filter(
-      (s) => new Date(s.created_date) >= startDate
-    );
-    filteredRecords = filteredRecords.filter(
-      (r) => new Date(r.created_date) >= startDate
-    );
+    filteredSessions = filteredSessions.filter((s) => {
+      const sessionDate = new Date(s.class_date || s.createdAt);
+      return sessionDate >= startDate && sessionDate <= endDate;
+    });
 
-    return { filteredSessions, filteredRecords };
+    filteredRecords = filteredRecords.filter((r) => {
+      const recordDate = new Date(r.markedAt || r.createdAt);
+      return recordDate >= startDate && recordDate <= endDate;
+    });
+
+    return { filteredSessions, filteredRecords, filteredStudents };
   };
 
   const calculateStats = () => {
-    const { filteredSessions, filteredRecords } = getFilteredData();
+    const { filteredSessions, filteredRecords, filteredStudents } =
+      getFilteredData();
 
     const totalSessions = filteredSessions.length;
-    const totalAttendance = filteredRecords.length;
-    const expectedAttendance = filteredSessions.reduce(
-      (sum, s) => sum + (s.total_students_expected || 0),
-      0
-    );
+    const totalAttendance = filteredRecords.filter(
+      (r) => r.status === "present"
+    ).length;
+
+    // 🧮 Expected attendance = session count * filtered students
+    const expectedAttendance = totalSessions * filteredStudents.length;
     const averageAttendance =
-      expectedAttendance > 0 ? (totalAttendance / expectedAttendance) * 100 : 0;
+      expectedAttendance > 0
+        ? Math.round((totalAttendance / expectedAttendance) * 100)
+        : 0;
 
     return {
       totalSessions,
       totalAttendance,
-      averageAttendance: Math.round(averageAttendance),
-      totalStudents: students.length,
+      averageAttendance,
+      totalStudents: filteredStudents.length,
     };
   };
 
@@ -121,16 +150,17 @@ export default function AnalyticsPage() {
       <div className="max-w-7xl mx-auto">
         <AnalyticsHeader />
 
-        {/* Filters */}
+        {/* Filter Controls */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
+            {/* Time Period */}
             <div className="flex-1">
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Time Period
               </label>
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
                 <SelectTrigger className="w-full md:w-48">
-                  <SelectValue />
+                  <SelectValue placeholder="Select period" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="week">Last Week</SelectItem>
@@ -140,19 +170,21 @@ export default function AnalyticsPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Course Filter */}
             <div className="flex-1">
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Course
               </label>
               <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                 <SelectTrigger className="w-full md:w-64">
-                  <SelectValue />
+                  <SelectValue placeholder="Select course" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Courses</SelectItem>
                   {courses.map((course) => (
-                    <SelectItem key={course.id} value={course.id}>
-                      {course.course_name}
+                    <SelectItem key={course._id} value={course._id}>
+                      {course.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -161,100 +193,68 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Stats Overview */}
+        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white border border-gray-100 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Total Sessions
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats.totalSessions}
-                  </p>
+          {[
+            {
+              label: "Total Sessions",
+              value: stats.totalSessions,
+              icon: Calendar,
+              color: "from-blue-500 to-blue-600",
+            },
+            {
+              label: "Total Attendance",
+              value: stats.totalAttendance,
+              icon: Users,
+              color: "from-green-500 to-green-600",
+            },
+            {
+              label: "Average Attendance",
+              value: `${stats.averageAttendance}%`,
+              icon: TrendingUp,
+              color: "from-purple-500 to-purple-600",
+            },
+            {
+              label: "Total Students",
+              value: stats.totalStudents,
+              icon: BarChart3,
+              color: "from-orange-500 to-orange-600",
+            },
+          ].map(({ label, value, icon: Icon, color }) => (
+            <Card
+              key={label}
+              className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">{label}</p>
+                    <p className="text-3xl font-bold text-gray-900">{value}</p>
+                  </div>
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-gray-100 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Total Attendance
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats.totalAttendance}
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-gray-100 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Average Attendance
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats.averageAttendance}%
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-gray-100 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Total Students
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats.totalStudents}
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600">
-                  <BarChart3 className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Charts and Analytics */}
+        {/* Graphs */}
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
           <AttendanceChart data={getFilteredData()} isLoading={isLoading} />
           <AttendanceTrends data={getFilteredData()} isLoading={isLoading} />
         </div>
 
+        {/* Performance & Department Stats */}
         <div className="grid lg:grid-cols-2 gap-8">
           <StudentPerformance
-            students={students}
+            students={getFilteredData().filteredStudents}
             records={getFilteredData().filteredRecords}
             sessions={getFilteredData().filteredSessions}
             isLoading={isLoading}
           />
-          <DepartmentStats
-            students={students}
-            courses={courses}
-            data={getFilteredData()}
-            isLoading={isLoading}
-          />
+          <DepartmentStats data={{ courses, students }} isLoading={isLoading} />
         </div>
       </div>
     </div>
