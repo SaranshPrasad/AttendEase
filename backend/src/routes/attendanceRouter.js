@@ -152,7 +152,8 @@ attendanceRouter.get("/active/session/:facultyId", userAuth, async (req,res) => 
   const {facultyId} = req.params;
   try {
     const sessions = await AttendanceSession.find({faculty:facultyId});
-    res.status(200).json({message:"Session fetched!", sessions});
+    const filterSessions = sessions.filter((s) => s.status === 'active');
+    res.status(200).json({message:"Session fetched!", sessions:filterSessions});
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error: error.message });
     
@@ -187,6 +188,7 @@ attendanceRouter.get("/session/:sessionId/stats", async (req, res) => {
       total_present: presentCount,
       total_marked: totalRecords,
       remaining: totalRecords - presentCount,
+      records:session
     });
   } catch (err) {
     console.error(err);
@@ -300,5 +302,24 @@ attendanceRouter.get("/total/marked/present", userAuth, async (req,res) => {
   }
 });
 
+attendanceRouter.get("/records/faculty/:faculty", userAuth, async (req, res) => {
+  try {
+    const { faculty } = req.params;
+    const records = await AttendanceRecord.find({ faculty }).populate("session");
+    res.status(200).json({ message: "Records fetched", records });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching records", error: error.message });
+  }
+});
+
+attendanceRouter.get("/total/marked/present/:studentId", userAuth, async (req,res) => {
+  try {
+    const { studentId } = req.params;
+    const records = await AttendanceRecord.find({ student:studentId }).populate("session");
+    res.status(200).json({ message: "Records fetched", records });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching records", error: error.message });
+  }
+});
 
 module.exports = attendanceRouter;

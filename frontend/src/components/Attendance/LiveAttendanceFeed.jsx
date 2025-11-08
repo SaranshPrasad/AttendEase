@@ -227,7 +227,7 @@ export default function LiveAttendanceFeed({ activeSession }) {
   const [totalStudents, setTotalStudents] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const sessionId = activeSession.session._id;
+  const sessionId = activeSession?.session?._id;
 
   const fetchTotalStudents = async () => {
     try {

@@ -2,6 +2,7 @@
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
 // import { format } from "date-fns";
+
 // import StudentDetailsCard from "../components/student/StudentDetailsCard";
 // import TodayScheduleCard from "../components/student/TodayScheduleCard";
 // import LiveClassesCard from "../components/student/LiveClassesCard";
@@ -11,25 +12,23 @@
 //   const [currentUser, setCurrentUser] = useState(null);
 //   const [todaySchedule, setTodaySchedule] = useState([]);
 //   const [liveSessions, setLiveSessions] = useState([]);
+//   const [markedSessions, setMarkedSessions] = useState([]);
 //   const [studentId, setStudentId] = useState("");
 //   const [isLoading, setIsLoading] = useState(true);
-//   const [markedSessions, setMarkedSessions] = useState([]);
+//         const user = getUser();
 
 //   const dayName = format(new Date(), "EEEE");
 
+//   // Fetch user, timetable, and live sessions initially
 //   useEffect(() => {
-//     const loadStudentData = async () => {
+//     const fetchInitialData = async () => {
 //       setIsLoading(true);
 //       try {
-//         const user = getUser();
-//         if (!user?.semester || !user?.email) {
-//           setIsLoading(false);
-//           return;
-//         }
+//         if (!user?.semester || !user?.email) return setIsLoading(false);
 
 //         setCurrentUser(user);
 
-//         // Fetch timetable and student details together
+//         // Fetch timetable and student details concurrently
 //         const [timetableRes, studentRes] = await Promise.all([
 //           axios.get(
 //             `http://localhost:5001/student/view/timetable/${dayName}/${user.semester}`
@@ -38,44 +37,47 @@
 //             withCredentials: true,
 //           }),
 //         ]);
+//         console.log("Timetable Res : ", timetableRes)
+//         setTodaySchedule(timetableRes.data?.timetable || []);
+//         setStudentId(studentRes.data?.student?._id || "");
 
-//         setTodaySchedule(timetableRes.data.timetable || []);
-//         setStudentId(studentRes.data.student._id);
-
-//         // Fetch active attendance sessions once after loading user data
-//         await detectLiveSessions();
+//         // Fetch live sessions after initial load
+//         await fetchLiveSessions();
 //       } catch {
-//         // handle silently
+//         // handle silently to prevent breaking UI
 //       } finally {
 //         setIsLoading(false);
 //       }
 //     };
 
-//     loadStudentData();
+//     fetchInitialData();
 //   }, []);
 
-//   // Poll every minute for live sessions (only after schedule loaded)
+//   // Periodically check for new live sessions (every 60 seconds)
 //   useEffect(() => {
 //     if (!todaySchedule.length) return;
-//     const interval = setInterval(detectLiveSessions, 60000);
+
+//     const interval = setInterval(fetchLiveSessions, 60000);
 //     return () => clearInterval(interval);
 //   }, [todaySchedule]);
 
-//   const detectLiveSessions = async () => {
+//   // Fetch currently active attendance sessions
+//   const fetchLiveSessions = async () => {
 //     try {
-//       const { data } = await axios.get(
-//         `http://localhost:5001/attendance/active`,
-//         { withCredentials: true }
-//       );
-//       setLiveSessions(data.sessions || []);
+//       const { data } = await axios.get(`http://localhost:5001/attendance/active`, {
+//         withCredentials: true,
+//       });
+//       const filteredSessions = data?.sessions.filter((s) => s.semester === user.semester);
+//       setLiveSessions(filteredSessions);
 //     } catch {
-//       // silently ignore errors to avoid UI flicker
+//       // ignore errors silently to avoid flicker
 //     }
 //   };
 
+//   // Mark attendance for a specific session
 //   const handleMarkAttendance = async (sessionId, facultyId, subjectId) => {
 //     try {
-//       const res = await axios.post(
+//       const response = await axios.post(
 //         "http://localhost:5001/attendance/mark",
 //         {
 //           sessionId,
@@ -86,13 +88,13 @@
 //         { withCredentials: true }
 //       );
 
-//       if (res.status === 200) {
+//       if (response.status === 200) {
 //         alert("✅ Attendance marked successfully!");
 //         setMarkedSessions((prev) => [...prev, sessionId]);
 //       }
-//     } catch (err) {
+//     } catch (error) {
 //       alert(
-//         err.response?.data?.message || "Error marking attendance. Try again."
+//         error.response?.data?.message || "Error marking attendance. Try again."
 //       );
 //     }
 //   };
@@ -100,7 +102,8 @@
 //   return (
 //     <div className="p-4 md:p-8 min-h-screen">
 //       <div className="max-w-7xl mx-auto">
-//         <div className="mb-8">
+//         {/* Header */}
+//         <header className="mb-8">
 //           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-500 bg-clip-text text-transparent mb-2">
 //             Student Dashboard
 //           </h1>
@@ -108,8 +111,9 @@
 //             Welcome back, {currentUser?.name || "Student"}! Here's your day at a
 //             glance.
 //           </p>
-//         </div>
+//         </header>
 
+//         {/* Dashboard Content */}
 //         <div className="grid lg:grid-cols-3 gap-8">
 //           <div className="lg:col-span-2 space-y-8">
 //             <LiveClassesCard
@@ -149,6 +153,7 @@ export default function StudentDashboard() {
   const [markedSessions, setMarkedSessions] = useState([]);
   const [studentId, setStudentId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const user = getUser();
 
   const dayName = format(new Date(), "EEEE");
 
@@ -157,7 +162,6 @@ export default function StudentDashboard() {
     const fetchInitialData = async () => {
       setIsLoading(true);
       try {
-        const user = getUser();
         if (!user?.semester || !user?.email) return setIsLoading(false);
 
         setCurrentUser(user);
@@ -171,14 +175,18 @@ export default function StudentDashboard() {
             withCredentials: true,
           }),
         ]);
-        console.log("Timetable Res : ", timetableRes)
-        setTodaySchedule(timetableRes.data?.timetable || []);
-        setStudentId(studentRes.data?.student?._id || "");
 
-        // Fetch live sessions after initial load
+        setTodaySchedule(timetableRes.data?.timetable || []);
+        const id = studentRes.data?.student?._id || "";
+        setStudentId(id);
+
+        // Fetch already marked sessions for this student
+        if (id) await fetchMarkedSessions(id);
+
+        // Fetch live sessions after everything else
         await fetchLiveSessions();
-      } catch {
-        // handle silently to prevent breaking UI
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
       } finally {
         setIsLoading(false);
       }
@@ -187,27 +195,49 @@ export default function StudentDashboard() {
     fetchInitialData();
   }, []);
 
-  // Periodically check for new live sessions (every 60 seconds)
+  // Periodically check for new live sessions
   useEffect(() => {
     if (!todaySchedule.length) return;
-
     const interval = setInterval(fetchLiveSessions, 60000);
     return () => clearInterval(interval);
   }, [todaySchedule]);
 
-  // Fetch currently active attendance sessions
+  // Fetch live attendance sessions
   const fetchLiveSessions = async () => {
     try {
       const { data } = await axios.get(`http://localhost:5001/attendance/active`, {
         withCredentials: true,
       });
-      setLiveSessions(data?.sessions || []);
-    } catch {
-      // ignore errors silently to avoid flicker
+      const filteredSessions = data?.sessions?.filter(
+        (s) => s.semester === user.semester
+      );
+      setLiveSessions(filteredSessions || []);
+    } catch (err) {
+      console.error("Error fetching live sessions:", err);
     }
   };
 
-  // Mark attendance for a specific session
+  // ✅ Fetch sessions that are already marked for this student
+  const fetchMarkedSessions = async (studentId) => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:5001/attendance/total/marked/present/${studentId}`,
+        { withCredentials: true }
+      );
+
+      // Extract all session IDs from attendance records
+      const records = data.records || [];
+      const filtered = records
+        .filter((rec) => rec.status === "present" && rec.session)
+        .map((rec) => rec.session._id);
+
+      setMarkedSessions(filtered);
+    } catch (err) {
+      console.error("Error fetching marked sessions:", err);
+    }
+  };
+
+  // ✅ Mark attendance for a session
   const handleMarkAttendance = async (sessionId, facultyId, subjectId) => {
     try {
       const response = await axios.post(
@@ -223,7 +253,8 @@ export default function StudentDashboard() {
 
       if (response.status === 200) {
         alert("✅ Attendance marked successfully!");
-        setMarkedSessions((prev) => [...prev, sessionId]);
+        // Update marked sessions in state instantly
+        setMarkedSessions((prev) => [...new Set([...prev, sessionId])]);
       }
     } catch (error) {
       alert(

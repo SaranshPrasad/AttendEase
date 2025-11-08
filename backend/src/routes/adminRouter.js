@@ -138,6 +138,9 @@ adminRouter.get("/view/faculty", async (req, res) => {
   }
 });
 
+
+
+
 adminRouter.get("/view/second/faculty", userAuth, async (req, res) => {
   try {
     const { role } = req.user;
@@ -387,6 +390,7 @@ adminRouter.patch(
     }
   }
 );
+
 
 // Courses
 
