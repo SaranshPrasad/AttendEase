@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import AttendanceHeader from "../components/Attendance/AttendanceHeader";
 import ClassSelector from "../components/Attendance/ClassSelector";
-import QRCodeDisplay from "../components/Attendance/QrCodeDisplay";
 import LiveAttendanceFeed from "../components/Attendance/LiveAttendanceFeed";
 import AttendanceSummary from "../components/Attendance/AttendanceSummary";
 

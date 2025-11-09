@@ -27,27 +27,65 @@ export default function StudentCoursesPage() {
         return;
       }
       setCurrentUser(user);
+
+      // Fetch student profile
       const { data: studentRes } = await axios.get(
         `http://localhost:5001/student/view/email/${user.email}`,
         { withCredentials: true }
       );
       const student = studentRes?.student;
       setStudentProfile(student);
+
+      // Fetch student's enrolled courses
       const { data: courseRes } = await axios.get(
         `http://localhost:5001/student/courses/view/${student.semester}`,
         { withCredentials: true }
       );
-      setMyCourses(courseRes?.courses || []);
+      const courses = courseRes?.courses || [];
+      setMyCourses(courses);
+
+      // Fetch attendance sessions for the semester
+      const sessionRes = await axios.get(
+        `http://localhost:5001/attendance/sessions/${student.semester}`,
+        { withCredentials: true }
+      );
+      const allSessions = sessionRes.data.sessions || [];
+
+      // Fetch total attended sessions for the student
+      const presentRes = await axios.get(
+        `http://localhost:5001/attendance/total/marked/present/${student._id}`,
+        { withCredentials: true }
+      );
+      const attendedSessions = presentRes.data.records || [];
+      // Build course-wise attendance stats
       const stats = {};
-      (courseRes?.courses || []).forEach((course) => {
+      courses.forEach((course) => {
+        // Filter total sessions for this course
+        const courseSessions = allSessions.filter(
+          (s) => s.subject === course._id
+        );
+
+        // Filter attended sessions for this course
+        const attendedCourseSessions = attendedSessions.filter(
+          (a) => a.session.subject === course._id
+        );
+
+        const totalSessions = courseSessions.length;
+        const attendedCount = attendedCourseSessions.length;
+        const percentage =
+          totalSessions > 0
+            ? Math.round((attendedCount / totalSessions) * 100)
+            : 0;
+
         stats[course._id] = {
-          totalSessions: 20,
-          attendedSessions: Math.floor(Math.random() * 20),
-          percentage: Math.floor(Math.random() * 100),
-          upcomingClasses: Math.floor(Math.random() * 5),
+          totalSessions,
+          attendedSessions: attendedCount,
+          percentage,
+          upcomingClasses: 0, // optional if you add later
           credits: course.credits || 3,
         };
       });
+
       setCourseStats(stats);
     } catch (error) {
       console.error("Error loading student courses:", error);

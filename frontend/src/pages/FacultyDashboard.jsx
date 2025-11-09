@@ -33,13 +33,22 @@ export default function FacultyDashboard() {
       const now = new Date();
       const currentDay = now.toLocaleString("en-US", { weekday: "long" }); 
       const liveSessions = timetable.filter(cls => cls.day === currentDay);
-      console.log("🟢 Live Sessions Found:", liveSessions);
       setActiveSessions(liveSessions);
       setTodayClasses(liveSessions);
+
+      const totalSessionsRes = await axios.get(`http://localhost:5001/attendance/sessions/all/done/${faculty._id}`, {withCredentials:true})
+      const totalSessions = totalSessionsRes.data.sessions.length;
+
+
+      const totalRecordsRes = await axios.get(`http://localhost:5001/attendance/records/faculty/${faculty._id}`, {withCredentials:true});
+      const totalRecords = totalRecordsRes.data.records.length;
+
+      const avg = (totalRecords / totalSessions) * 100;
+      console.log(totalSessions,totalRecords,avg)
       setStats({
         myClasses: faculty?.courses?.length || 0,
         activeSessions: liveSessions.length,
-        avgAttendance: 0,
+        avgAttendance: Math.round(avg),
       });
     } catch (error) {
       console.error("Error loading faculty dashboard data:", error);

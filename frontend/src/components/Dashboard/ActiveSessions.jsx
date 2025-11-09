@@ -9,8 +9,6 @@ import { Progress } from "@/components/ui/progress";
 
 
 export default function ActiveSessions({ sessions, isLoading }) {
-
-  console.log("Sessions from active session page ",sessions);
   if (isLoading) {
     return (
       <Card className="bg-white border border-gray-100 shadow-lg">

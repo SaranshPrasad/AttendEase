@@ -1,10 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import axios from "axios";
+import { getUser } from "../../lib/utils";
 
-export default function AttendanceStatsCard({ courses, stats, isLoading }) {
+export default function AttendanceStatsCard({
+  courses,
+  stats,
+  isLoading,
+  studentId,
+}) {
+  const user = getUser();
+
+  const [avgAttendance, setAvg] = useState(null);
+  useEffect(() => {
+    const loadDatas = async () => {
+      const res = await axios.get(
+        `http://localhost:5001/attendance/total/marked/present/${studentId}`,
+        { withCredentials: true }
+      );
+      const totalPresent = res.data.sessions.length;
+      const sessionRes = await axios.get(
+        `http://localhost:5001/attendance/sessions/${user.semester}`,
+        { withCredentials: true }
+      );
+      const totalClasses = sessionRes.data.sessions.length;
+      const avgAttendance = (totalPresent / totalClasses) * 100;
+      setAvg(Math.round(avgAttendance));
+    };
+    loadDatas();
+  }, []);
+
   if (isLoading) {
     return (
       <Card className="bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg">
@@ -26,17 +54,6 @@ export default function AttendanceStatsCard({ courses, stats, isLoading }) {
       </Card>
     );
   }
-
-  const overallAttendance =
-    courses.length > 0
-      ? Math.round(
-          Object.values(stats).reduce(
-            (sum, stat) => sum + (stat.percentage || 0),
-            0
-          ) / courses.length
-        )
-      : 0;
-
   return (
     <Card className="bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg">
       <CardHeader>
@@ -53,10 +70,10 @@ export default function AttendanceStatsCard({ courses, stats, isLoading }) {
               Overall Attendance
             </span>
             <span className="text-2xl font-bold text-purple-700">
-              {overallAttendance}%
+              {avgAttendance}%
             </span>
           </div>
-          <Progress value={overallAttendance} className="h-3" />
+          <Progress value={avgAttendance} className="h-3" />
         </div>
 
         {/* Course-wise breakdown */}

@@ -16,7 +16,6 @@ export const getNavigationItems = (userRole) => {
     { title: "Faculty", url: createPageUrl("Faculty"), icon: UserCog },
     { title: "Courses", url: createPageUrl("Courses"), icon: BookOpen },
     { title: "Timetable", url: createPageUrl("Timetable"), icon: Calendar },
-    // { title: "Attendance", url: createPageUrl("Attendance"), icon: UserCheck },
     { title: "Analytics", url: createPageUrl("Analytics"), icon: BarChart3 },
     { title: "Reports", url: createPageUrl("Reports"), icon: FileText },
   ];
@@ -29,11 +28,6 @@ const facultyItems = [
     },
     { title: "My Courses", url: createPageUrl("Courses"), icon: BookMarked },
     { title: "Timetable", url: createPageUrl("Timetable"), icon: Calendar },
-    // {
-    //   title: "Take Attendance",
-    //   url: createPageUrl("Attendance"),
-    //   icon: QrCode,
-    // },
     {
       title: "My Analytics",
       url: createPageUrl("FacultyAnalytics"),
@@ -54,11 +48,6 @@ const facultyItems = [
       title: "My Courses",
       url: createPageUrl("StudentCourses"),
       icon: BookOpen,
-    },
-    {
-      title: "Mark Attendance",
-      url: createPageUrl("StudentAttendance"),
-      icon: QrCode,
     },
     { title: "Timetable", url: createPageUrl("Timetable"), icon: Calendar },
     { title: "Notifications", url: createPageUrl("Notifications"), icon: Bell },

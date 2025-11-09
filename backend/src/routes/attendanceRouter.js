@@ -9,29 +9,6 @@ const userAuth = require("../middleware/auth");
 
 attendanceRouter.use(express.json());
 
-// attendanceRouter.get("/active", userAuth, async (req, res) => {
-//   try {
-//     const { role } = req.user;
-
-//     if (role === "student") {
-//       const response = await AttendanceSession.find()
-//         .populate("faculty", "name")  
-//         .populate("subject", "name")
-//         .lean();
-      
-//       console.log(response);
-//       if (response.length > 0 && response.status === 'active') {
-//         res.status(200).json({ message: "Attendance Sessions fetched", response });
-//       } else {
-//         res.status(200).json({ message: "No active sessions", response });
-//       }
-//     } else {
-//       throw new Error("Student role required to fetch active sessions");
-//     }
-//   } catch (error) {
-//     res.status(404).json({ message: "Something went wrong", error: error.message });
-//   }
-// });
 attendanceRouter.get("/active", userAuth, async (req, res) => {
   try {
     const { role } = req.user;
@@ -262,12 +239,10 @@ attendanceRouter.get("/all/sessions/:courseId", userAuth, async(req,res) => {
 attendanceRouter.get("/sessions/:semester", userAuth, async(req,res) => {
   try {
     const {semester} = req.params;
-    const sessions = await AttendanceSession.find({semester:semester});
-    if(sessions.length > 0){
+    const sessions = await AttendanceSession.find({semester: Number(semester)});
+    
       res.status(200).json({message:"Data fetched....", sessions});
-    }else{
-      res.status(200).json({message:"Not enough data to display..", sessions});
-    }
+    
   } catch (error) {
     res.status(500).json({ message: "Error fetching live attendance", error: error.message });
     
