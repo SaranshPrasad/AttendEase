@@ -5,7 +5,7 @@ import { Plus, Search, BookOpen } from "lucide-react";
 
 import CourseCard from "../components/Courses/CourseCard";
 import CourseForm from "../components/Courses/CourseForm";
-import CoursesHeader from "../Components/Courses/CoursesHeader";
+import CoursesHeader from "../components/Courses/CoursesHeader";
 import CoursesFilters from "../components/Courses/CoursesFilters";
 
 import Course from "../lib/Course";
