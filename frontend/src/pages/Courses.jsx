@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, BookOpen } from "lucide-react";
 
-import CourseCard from "../components/courses/CourseCard";
-import CourseForm from "../components/courses/CourseForm";
+import CourseCard from "../components/Courses/CourseCard";
+import CourseForm from "../components/Courses/CourseForm";
 import CoursesHeader from "../Components/Courses/CoursesHeader";
-import CoursesFilters from "../components/courses/CoursesFilters";
+import CoursesFilters from "../components/Courses/CoursesFilters";
 
 import Course from "../lib/Course";
 import Faculty from "../lib/Faculty";

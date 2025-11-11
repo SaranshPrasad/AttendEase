@@ -21,7 +21,7 @@ import {
 } from "recharts";
 import { Users, TrendingUp, Calendar, BookOpen } from "lucide-react";
 import { getUser } from "../lib/utils";
-import StudentPerformance from "../components/analytics/StudentPerformance";
+import StudentPerformance from "../components/Analytics/StudentPerformance";
 
 export default function FacultyAnalyticsPage() {
   const [currentUser, setCurrentUser] = useState(null);

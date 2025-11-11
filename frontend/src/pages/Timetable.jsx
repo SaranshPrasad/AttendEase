@@ -9,8 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Calendar, Filter } from "lucide-react";
-import TimetableGrid from "../components/timetable/TimetableGrid";
-import ScheduleForm from "../components/timetable/ScheduleForm";
+import TimetableGrid from "../components/Timetable/TimetableGrid";
+import ScheduleForm from "../components/Timetable/ScheduleForm";
 import Timetable from "../lib/Timetable";
 import Faculty from "../lib/Faculty";
 import Course from "../lib/Course";

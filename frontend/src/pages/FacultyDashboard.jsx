@@ -2,9 +2,9 @@
 import Timetable from "../lib/Timetable";
 import React, { useState, useEffect } from "react";
 import { BookOpen, Clock, TrendingUp, QrCode, BookMarked, FileText } from "lucide-react";
-import DashboardStats from "../components/dashboard/DashboardStats";
-import ActiveSessions from "../components/dashboard/ActiveSessions";
-import QuickActions from "../components/dashboard/QuickActions";
+import DashboardStats from "../components/Dashboard/DashboardStats";
+import ActiveSessions from "../components/Dashboard/ActiveSessions";
+import QuickActions from "../components/Dashboard/QuickActions";
 import axios from "axios";
 
 

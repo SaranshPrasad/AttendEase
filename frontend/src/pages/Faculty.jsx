@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, UserCog } from "lucide-react";
 
-import FacultyCard from "../components/faculty/FacultyCard";
-import FacultyForm from "../components/faculty/FacultyForm";
-import FacultyHeader from "../components/faculty/FacultyHeader";
+import FacultyCard from "../components/Faculty/FacultyCard";
+import FacultyForm from "../components/Faculty/FacultyForm";
+import FacultyHeader from "../components/Faculty/FacultyHeader";
 import Faculty from "../lib/Faculty";
 import { getFaculty } from "../lib/getFacultyData";
 
