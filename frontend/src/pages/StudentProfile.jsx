@@ -18,10 +18,10 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-import StudentDetailsCard from "../components/student/StudentDetailsCard";
-import TodayScheduleCard from "../components/student/TodayScheduleCard";
-import LiveClassesCard from "../components/student/LiveClassesCard";
-import AttendanceStatsCard from "../components/student/AttendanceStatsCard";
+import StudentDetailsCard from "../components/Student/StudentDetailsCard";
+import TodayScheduleCard from "../components/Student/TodayScheduleCard";
+import LiveClassesCard from "../components/Student/LiveClassesCard";
+import AttendanceStatsCard from "../components/Student/AttendanceStatsCard";
 import { getUser } from "../lib/utils";
 
 export default function StudentProfilePage() {

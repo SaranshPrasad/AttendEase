@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns";
 
-import StudentDetailsCard from "../components/student/StudentDetailsCard";
-import TodayScheduleCard from "../components/student/TodayScheduleCard";
-import LiveClassesCard from "../components/student/LiveClassesCard";
+import StudentDetailsCard from "../components/Student/StudentDetailsCard";
+import TodayScheduleCard from "../components/Student/TodayScheduleCard";
+import LiveClassesCard from "../components/Student/LiveClassesCard";
 import { getUser } from "../lib/utils";
 
 export default function StudentDashboard() {
