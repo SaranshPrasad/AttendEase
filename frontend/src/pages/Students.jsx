@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Plus, Search, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Student from "../lib/Student";
-import StudentCard from "../components/students/StudentCard";
-import StudentForm from "../components/students/StudentForm";
-import StudentsHeader from "../components/students/StudentsHeader";
+import StudentCard from "../components/Students/StudentCard";
+import StudentForm from "../components/Students/StudentForm";
+import StudentsHeader from "../components/Students/StudentsHeader";
 import { getStudents } from "../lib/getStudentData";
 import UploadCSVButton from "../components/ui/csvuploadbutton";
 
