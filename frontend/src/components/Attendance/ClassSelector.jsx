@@ -12,8 +12,6 @@ import axios from "axios";
 export default function ClassSelector({ selectedClass, setSelectedClass, onStartSession, isLoading, setIsActive }) {
   const [selectedClassData, setSelectedClassData] = useState(null);
   const [sessionPayload, setSessionPayload] = useState(null);
-
-  // Auto-generate session payload when class is selected
   useEffect(() => {
     if (selectedClassData) {
       const slot = selectedClassData.slots?.[0];
@@ -44,14 +42,14 @@ export default function ClassSelector({ selectedClass, setSelectedClass, onStart
 
     try {
       const res = await axios.post(
-        "http://localhost:5001/attendance/create/active/session",
+        `${import.meta.env.VITE_API_URL}/attendance/create/active/session`,
         sessionPayload,
         { withCredentials: true }
       );
 
       alert("✅ Attendance session created successfully!");
      
-      if (onStartSession) onStartSession(res.data); // send session to parent
+      if (onStartSession) onStartSession(res.data);
       const active = res.data;
       localStorage.setItem("active-session", JSON.stringify(active));
       setIsActive(true);

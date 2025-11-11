@@ -19,7 +19,12 @@ import {
   Delete,
 } from "lucide-react";
 
-export default function FacultyCard({ faculty, onEdit, onToggleStatus,onDelete }) {
+export default function FacultyCard({
+  faculty,
+  onEdit,
+  onToggleStatus,
+  onDelete,
+}) {
   const getRoleColor = (role) => {
     switch (role) {
       case "admin":
@@ -37,16 +42,10 @@ export default function FacultyCard({ faculty, onEdit, onToggleStatus,onDelete }
       : "bg-red-100 text-red-800 border-red-200";
   };
 
-
   return (
     <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
       <CardContent className="p-6">
         <div className="flex flex-col items-center text-center">
-          {/* Profile Image */}
-          {/* <div className="w-20 h-20 rounded-full mb-4 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-            <User className="w-10 h-10 text-gray-400" />
-          </div> */}
-
           {/* Faculty Info */}
           <h3 className="font-bold text-lg text-gray-900 mb-1">
             {faculty.name}
@@ -59,8 +58,7 @@ export default function FacultyCard({ faculty, onEdit, onToggleStatus,onDelete }
 
           {/* Badges */}
           <div className="flex gap-2 mb-4 flex-wrap justify-center">
-            <Badge> {faculty.phone}
-            </Badge>
+            <Badge> {faculty.phone}</Badge>
             <Badge
               className={getStatusColor(faculty.account_created)}
               variant="outline"

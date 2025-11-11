@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import { AttendanceSession } from "@/entities/AttendanceSession";
-// import { AttendanceRecord } from "@/entities/AttendanceRecord";
-// import { Student } from "@/entities/Student";
-// import { Course } from "@/entities/Course";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

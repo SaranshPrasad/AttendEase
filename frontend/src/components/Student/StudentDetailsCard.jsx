@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,14 +10,13 @@ import { format } from "date-fns";
 export default function StudentDetailsCard({ student, isLoading }) {
   const [courses, setCourses] = useState([]);
 
-
   useEffect(() => {
     if (!student?.semester) return;
 
     const loadCourses = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5001/student/courses/view/${student.semester}`,
+          `${import.meta.env.VITE_API_URL}/student/courses/view/${student.semester}`,
           { withCredentials: true }
         );
         setCourses(res.data?.courses || []);
@@ -27,11 +25,9 @@ export default function StudentDetailsCard({ student, isLoading }) {
       }
     };
 
-   
-
     loadCourses();
   }, [student?.semester]);
-  
+
   if (isLoading) {
     return (
       <Card className="bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg">
@@ -49,26 +45,25 @@ export default function StudentDetailsCard({ student, isLoading }) {
   return (
     <Card className="bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg">
       <CardHeader className="text-center pb-4">
-       
         <div className="w-24 h-24 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center mb-4 shadow-md">
-  {student?.photo_url ? (
-    <img
-      src={student.photo_url}
-      alt="Profile"
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <span className="text-white text-3xl font-semibold">
-      {student?.name
-        ? student.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-        : "S"}
-    </span>
-  )}
-</div>
+          {student?.photo_url ? (
+            <img
+              src={student.photo_url}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-white text-3xl font-semibold">
+              {student?.name
+                ? student.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                : "S"}
+            </span>
+          )}
+        </div>
 
         <CardTitle className="text-xl font-bold text-gray-900">
           {student?.name || "Student"}

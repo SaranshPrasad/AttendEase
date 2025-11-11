@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const express = require("express");
 const MasterFaculty = require("../models/master_faculty");
@@ -13,7 +12,9 @@ facultyRouter.use(cookieParser());
 facultyRouter.get("/view/:email", async (req, res) => {
   try {
     const { email } = req.params;
-    const faculty = await MasterFaculty.findOne({ email: email }).populate("courses");
+    const faculty = await MasterFaculty.findOne({ email: email }).populate(
+      "courses"
+    );
     if (!faculty) {
       throw new Error(`Faculty not found with ${email}.`);
     }
@@ -30,20 +31,14 @@ facultyRouter.get("/view/:email", async (req, res) => {
   }
 });
 
-
 facultyRouter.get("/view/timetable/:email", async (req, res) => {
   try {
     const { email } = req.params;
-
-    // Find the faculty using their email
     const faculty = await MasterFaculty.findOne({ email });
     if (!faculty) {
       return res.status(404).json({ message: "Faculty not found" });
     }
-
     const facultyId = faculty._id;
-
-    // Find timetables where any slot's faculty matches this faculty ID
     const timetable = await Timetable.find({ "slots.faculty": facultyId })
       .populate("slots.subject")
       .populate("slots.faculty");
@@ -60,12 +55,4 @@ facultyRouter.get("/view/timetable/:email", async (req, res) => {
     });
   }
 });
-
-
-
-
-
-
-
-
 module.exports = facultyRouter;

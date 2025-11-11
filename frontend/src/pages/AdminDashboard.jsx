@@ -60,14 +60,14 @@ export default function AdminDashboard() {
     
 // ✅ Fetch sessions and attendance records
     const { data: sessions } = await axios.get(
-      "http://localhost:5001/attendance/all/sessions",
+      `${import.meta.env.VITE_API_URL}/attendance/all/sessions`,
       { withCredentials: true }
     );
 
 
 
     const { data: attendanceRecords } = await axios.get(
-      "http://localhost:5001/attendance/total/marked/present",
+      `${import.meta.env.VITE_API_URL}/attendance/total/marked/present`,
       { withCredentials: true }
     );
 

@@ -37,16 +37,16 @@ export default function AnalyticsPage() {
 
       // Fetch attendance sessions and records
       const [sessionRes, recordRes, courseRes, studentRes] = await Promise.all([
-        axios.get("http://localhost:5001/attendance/all/sessions", {
+        axios.get(`${import.meta.env.VITE_API_URL}/attendance/all/sessions`, {
           withCredentials: true,
         }),
-        axios.get("http://localhost:5001/attendance/total/marked/present", {
+        axios.get(`${import.meta.env.VITE_API_URL}/attendance/total/marked/present`, {
           withCredentials: true,
         }),
-        axios.get("http://localhost:5001/admin/view/courses", {
+        axios.get(`${import.meta.env.VITE_API_URL}/admin/view/courses`, {
           withCredentials: true,
         }),
-        axios.get("http://localhost:5001/admin/view/students", {
+        axios.get(`${import.meta.env.VITE_API_URL}/admin/view/students`, {
           withCredentials: true,
         }),
       ]);

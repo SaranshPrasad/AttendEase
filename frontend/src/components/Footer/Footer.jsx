@@ -144,7 +144,7 @@ const Footer = () => {
           <FaRegCopyright className="mr-1" />
           2025 AttendEase.
         </span>
-        <span>All rights reserved.</span>
+        <span>All rights reserved. Made with 🧠 By Saransh Prasad Bari @Saransh</span>
       </div>
     </footer>
   );

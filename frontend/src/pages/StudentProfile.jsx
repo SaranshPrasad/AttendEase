@@ -50,9 +50,9 @@ export default function StudentProfilePage() {
         // Fetch timetable & student details concurrently
         const [timetableRes, studentRes] = await Promise.all([
           axios.get(
-            `http://localhost:5001/student/view/timetable/${dayName}/${user.semester}`
+            `${import.meta.env.VITE_API_URL}/student/view/timetable/${dayName}/${user.semester}`
           ),
-          axios.get(`http://localhost:5001/student/view/email/${user.email}`, {
+          axios.get(`${import.meta.env.VITE_API_URL}/student/view/email/${user.email}`, {
             withCredentials: true,
           }),
         ]);
@@ -83,7 +83,7 @@ export default function StudentProfilePage() {
   const fetchLiveSessions = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5001/attendance/active`,
+        `${import.meta.env.VITE_API_URL}/attendance/active`,
         {
           withCredentials: true,
         }

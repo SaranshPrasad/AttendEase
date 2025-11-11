@@ -1,8 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-// import { AttendanceSession } from "@/entities/AttendanceSession";
-// import { AttendanceRecord } from "@/entities/AttendanceRecord";
-// import { Student } from "@/entities/Student";
-// import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

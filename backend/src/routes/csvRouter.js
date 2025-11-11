@@ -5,10 +5,6 @@ const fs = require("fs");
 const MasterStudent = require("../models/master_students");
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
-
-
-
-// CSV Upload Route
 router.post("/upload", upload.single("file"), (req, res) => {
   const results = [];
   fs.createReadStream(req.file.path)

@@ -9,15 +9,12 @@ export default function AttendanceSummary({ session }) {
   const [totalStudents, setTotalStudents] = useState(0);
   const [presentStudents, setPresentStudents] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-
   const sessionId = session?.session?._id;
   const semester = session?.session?.semester;
-
-  // Fetch total students of the semester
   const fetchTotalStudents = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5001/student/view/${semester}`,
+        `${import.meta.env.VITE_API_URL}/student/view/${semester}`,
         { withCredentials: true }
       );
       setTotalStudents(res.data.totalStudents || 0);
@@ -25,12 +22,10 @@ export default function AttendanceSummary({ session }) {
       console.error("Error fetching total students:", error);
     }
   };
-
-  // Fetch live attendance (present students count)
   const fetchPresentStudents = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5001/attendance/live/${sessionId}`,
+        `${import.meta.env.VITE_API_URL}/attendance/live/${sessionId}`,
         { withCredentials: true }
       );
       setPresentStudents(data.presentStudents?.length || 0);
@@ -38,8 +33,6 @@ export default function AttendanceSummary({ session }) {
       console.error("Error fetching present students:", error);
     }
   };
-
-  // Initialize and auto-refresh every 5 seconds
   useEffect(() => {
     if (!sessionId || !semester) return;
 

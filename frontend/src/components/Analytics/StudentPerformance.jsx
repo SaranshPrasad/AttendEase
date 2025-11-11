@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,13 +37,10 @@ export default function StudentPerformance({
       </Card>
     );
   }
-
-  // 🧮 Compute stats for each student (even if not in records)
   const studentStats = useMemo(() => {
     const totalSessions = sessions.length;
 
     return students.map((student) => {
-      // Find only PRESENT records for this student
       const studentRecords = records.filter(
         (r) => r.student === student._id && r.status === "present"
       );
@@ -61,15 +57,10 @@ export default function StudentPerformance({
       };
     });
   }, [students, records, sessions]);
-
-  // 🔢 Sort by attendance rate (lowest → highest)
   const sortedStudents = useMemo(
-  () => [...studentStats].sort((a, b) => b.attendanceRate - a.attendanceRate),
-  [studentStats]
-);
-
-
-  // 🏷️ Helper to decide performance badge
+    () => [...studentStats].sort((a, b) => b.attendanceRate - a.attendanceRate),
+    [studentStats]
+  );
   const getPerformanceBadge = (rate) => {
     if (rate >= 90)
       return {
@@ -143,4 +134,3 @@ export default function StudentPerformance({
     </Card>
   );
 }
-

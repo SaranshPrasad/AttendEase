@@ -50,7 +50,6 @@ authRouter.post("/signup", async (req, res) => {
         fingerprint,
       },
         });
-        console.log(deviceInfo);
         const newData = await newStudent.save();
         check_verification.account_created = true;
         await check_verification.save();

@@ -30,7 +30,7 @@ export default function StudentCoursesPage() {
 
       // Fetch student profile
       const { data: studentRes } = await axios.get(
-        `http://localhost:5001/student/view/email/${user.email}`,
+        `${import.meta.env.VITE_API_URL}/student/view/email/${user.email}`,
         { withCredentials: true }
       );
       const student = studentRes?.student;
@@ -38,7 +38,7 @@ export default function StudentCoursesPage() {
 
       // Fetch student's enrolled courses
       const { data: courseRes } = await axios.get(
-        `http://localhost:5001/student/courses/view/${student.semester}`,
+        `${import.meta.env.VITE_API_URL}/student/courses/view/${student.semester}`,
         { withCredentials: true }
       );
       const courses = courseRes?.courses || [];
@@ -46,14 +46,14 @@ export default function StudentCoursesPage() {
 
       // Fetch attendance sessions for the semester
       const sessionRes = await axios.get(
-        `http://localhost:5001/attendance/sessions/${student.semester}`,
+        `${import.meta.env.VITE_API_URL}/attendance/sessions/${student.semester}`,
         { withCredentials: true }
       );
       const allSessions = sessionRes.data.sessions || [];
 
       // Fetch total attended sessions for the student
       const presentRes = await axios.get(
-        `http://localhost:5001/attendance/total/marked/present/${student._id}`,
+        `${import.meta.env.VITE_API_URL}/attendance/total/marked/present/${student._id}`,
         { withCredentials: true }
       );
       const attendedSessions = presentRes.data.records || [];

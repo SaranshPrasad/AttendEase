@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,17 +20,13 @@ export default function CoursesPage() {
   const [editingCourse, setEditingCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fac, setFac] = useState([]);
-  const [cor, setCor] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     department: "all",
     semester: "all",
   });
-
   const role = localStorage.getItem("role");
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-
-  // ✅ Load based on role
   useEffect(() => {
     if (role === "admin") {
       loadFacAndCourses();
@@ -42,8 +37,6 @@ export default function CoursesPage() {
       setIsLoading(false);
     }
   }, []);
-
-  // ✅ Load for admin
   const loadFacAndCourses = async () => {
     setIsLoading(true);
     try {
@@ -57,12 +50,9 @@ export default function CoursesPage() {
     }
     setIsLoading(false);
   };
-
-  // ✅ Load for faculty
   const loadFacultyAndCourses = async (email) => {
     setIsLoading(true);
     try {
-      // fetch specific faculty by email using your backend route `/view/:email`
       const res = await getCoursesFromEmail(email);
       const faculty = res.faculty;
       const courses = res.courses || [];
@@ -75,11 +65,8 @@ export default function CoursesPage() {
     }
     setIsLoading(false);
   };
-
-  // ✅ Filter logic
   const filterCourses = useCallback(() => {
     let filtered = courses;
-
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -88,27 +75,22 @@ export default function CoursesPage() {
           course.department?.toLowerCase().includes(term)
       );
     }
-
     if (filters.department !== "all") {
       filtered = filtered.filter(
         (course) => course.department === filters.department
       );
     }
-
     if (filters.semester !== "all") {
       filtered = filtered.filter(
         (course) => course.semester === filters.semester
       );
     }
-
     setFilteredCourses(filtered);
   }, [courses, searchTerm, filters]);
 
   useEffect(() => {
     filterCourses();
   }, [filterCourses]);
-
-  // ✅ CRUD (only admin)
   const handleSubmit = async (courseData) => {
     if (editingCourse) {
       await Course.update(editingCourse._id, courseData);
@@ -121,14 +103,12 @@ export default function CoursesPage() {
     if (role === "admin") loadFacAndCourses();
     else loadFacultyAndCourses(facultyData.email);
   };
-
   const handleEdit = (course) => {
     if (role === "admin") {
       setEditingCourse(course);
       setShowForm(true);
     }
   };
-
   const handleDelete = async (courseId) => {
     if (role !== "admin") return;
     if (confirm("Are you sure you want to delete this course?")) {
@@ -137,41 +117,35 @@ export default function CoursesPage() {
       else loadFacultyAndCourses(facultyData.email);
     }
   };
-
   const getDepartments = () => {
     const departments = [...new Set(courses.map((c) => c.department))];
     return departments.filter(Boolean);
   };
-
   const getSemesters = () => {
     const semesters = [...new Set(courses.map((c) => c.semester))];
     return semesters.filter(Boolean);
   };
-
   const getCoursesFromEmail = async (email) => {
     try {
-      const res =  await axios.get(`http://localhost:5001/faculty/view/${email}`);
-      if(res){
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/faculty/view/${email}`
+      );
+      if (res) {
         return res.data;
-      }else{
-        throw("Something went wrong or data not fetched !");
+      } else {
+        throw "Something went wrong or data not fetched !";
       }
     } catch (error) {
       alert(error.message);
     }
-  }
-
-  // ✅ UI Rendering
+  };
   return (
     <div className="p-4 md:p-8 min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        {/* Header — hide Add button for faculty */}
         <CoursesHeader
           totalCourses={courses.length}
           onAddCourse={() => role === "admin" && setShowForm(true)}
         />
-
-        {/* Search + Filters */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -193,8 +167,6 @@ export default function CoursesPage() {
             />
           </div>
         </div>
-
-        {/* Courses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             Array(6)
@@ -220,7 +192,7 @@ export default function CoursesPage() {
               <CourseCard
                 key={course._id}
                 course={course}
-                faculty={facultyData}
+                faculty={fac}
                 onEdit={() => handleEdit(course)}
                 onDelete={() => handleDelete(course._id)}
               />
@@ -239,8 +211,6 @@ export default function CoursesPage() {
             </div>
           )}
         </div>
-
-        {/* ✅ Only Admin can see form */}
         {showForm && role === "admin" && (
           <CourseForm
             course={editingCourse}

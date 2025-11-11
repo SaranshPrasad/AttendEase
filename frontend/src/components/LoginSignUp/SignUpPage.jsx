@@ -267,12 +267,10 @@ const handleSubmit = async (e) => {
     }
 
     const res = await axios.post(
-      "http://localhost:5001/auth/signup",
+      `${import.meta.env.VITE_API_URL}/auth/signup`,
       payload,
       { withCredentials: true }
     );
-
-    console.log(res.data);
     alert(`Account for ${selectedPortal} created!\nName: ${formData.name}`);
     navigate("/login");
   } catch (err) {

@@ -5,7 +5,7 @@ export const getFaculty = async () =>{
         if(role != 'admin'){
         throw new Error("User is not authorised admin");
     }else{
-        const res = await axios.get('http://localhost:5001/admin/view/faculty', {withCredentials:true});
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/view/faculty`, {withCredentials:true});
         if(res){
             return res?.data.facultyData;
         }

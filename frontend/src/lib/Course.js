@@ -1,25 +1,21 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5001/admin"; // adjust if backend port differs
+const API_URL = "http://localhost:5001/admin";
 
 const Course = {
   // 🔹 View all courses
   list: async () => {
-    const res = await axios.get(`${API_URL}/view/courses`);
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/view/courses`);
     return res.data.courses || [];
   },
-
-  // 🔹 Add a new course
   create: async (courseData) => {
-    const res = await axios.post(`${API_URL}/add/course`, courseData, {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/admin/add/course`, courseData, {
       withCredentials: true,
     });
     return res.data;
   },
-
-  // 🔹 Delete a course
   delete: async (course_id) => {
-    const res = await axios.delete(`${API_URL}/delete/course`, {
+    const res = await axios.delete(`${import.meta.env.VITE_API_URL}/admin/delete/course`, {
       data: { course_id },
       withCredentials: true,
     });

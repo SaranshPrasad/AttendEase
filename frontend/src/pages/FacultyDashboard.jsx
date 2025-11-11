@@ -27,7 +27,7 @@ export default function FacultyDashboard() {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5001/faculty/view/${storedUser.email}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/faculty/view/${storedUser.email}`);
       const { faculty } = res.data;
       const timetable = await Timetable.listByFaculty(storedUser.email);
       const now = new Date();
@@ -36,11 +36,11 @@ export default function FacultyDashboard() {
       setActiveSessions(liveSessions);
       setTodayClasses(liveSessions);
 
-      const totalSessionsRes = await axios.get(`http://localhost:5001/attendance/sessions/all/done/${faculty._id}`, {withCredentials:true})
+      const totalSessionsRes = await axios.get(`${import.meta.env.VITE_API_URL}/attendance/sessions/all/done/${faculty._id}`, {withCredentials:true})
       const totalSessions = totalSessionsRes.data.sessions.length;
 
 
-      const totalRecordsRes = await axios.get(`http://localhost:5001/attendance/records/faculty/${faculty._id}`, {withCredentials:true});
+      const totalRecordsRes = await axios.get(`${import.meta.env.VITE_API_URL}/attendance/records/faculty/${faculty._id}`, {withCredentials:true});
       const totalRecords = totalRecordsRes.data.records.length;
 
       const avg = (totalRecords / totalSessions) * 100;

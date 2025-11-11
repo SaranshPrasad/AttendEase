@@ -4,32 +4,30 @@ import { QrCode, StopCircle } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-export default function AttendanceHeader({
-  activeSession,
-  selectedClass,
-}) {
- const [liveSessions, setLiveSessions] = useState({});
- const navigate = useNavigate();
+export default function AttendanceHeader({ activeSession, selectedClass }) {
+  const [liveSessions, setLiveSessions] = useState({});
+  const navigate = useNavigate();
   useEffect(() => {
     const checkActiveSession = async () => {
       const storedSession = localStorage.getItem("active-session");
       if (storedSession) {
-          const activeSession = JSON.parse(storedSession);
-          // console.log(activeSession);
-            setLiveSessions(activeSession.session); 
-          }
-       
+        const activeSession = JSON.parse(storedSession);
+        setLiveSessions(activeSession.session);
+      }
     };
     checkActiveSession();
   }, []);
-  
+
   const handleEndSession = async (sessionId) => {
-    const res = await axios.patch(`http://localhost:5001/attendance/end/session/${sessionId}`, {}, {withCredentials:true});
+    const res = await axios.patch(
+      `${import.meta.env.VITE_API_URL}/attendance/end/session/${sessionId}`,
+      {},
+      { withCredentials: true }
+    );
     alert("Session Deleted..");
     localStorage.removeItem("active-session");
-    navigate('/facultyDashboard')
-  }
-  // console.log("Active Sessions : ",liveSessions);
+    navigate("/facultyDashboard");
+  };
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div className="flex items-center gap-4">

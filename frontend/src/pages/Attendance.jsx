@@ -23,9 +23,7 @@ export default function AttendancePage() {
       const storedSession = localStorage.getItem("active-session");
       if (storedSession) {
         try {
-          const activeSession = JSON.parse(storedSession); 
-          console.log(activeSession);
-
+          const activeSession = JSON.parse(storedSession);
           if (activeSession === null) {
             setIsActive(false);
           } else {
@@ -50,7 +48,7 @@ export default function AttendancePage() {
   const loadData = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5001/admin/view/timetable/${id}`
+        `${import.meta.env.VITE_API_URL}/admin/view/timetable/${id}`
       );
       setClasses(res.data.timetables || []);
     } catch (err) {
@@ -59,7 +57,6 @@ export default function AttendancePage() {
       setIsLoading(false);
     }
   };
-  console.log();
   return (
     <div className="p-4 md:p-8 min-h-screen bg-gray-50 subtle-dots-bg">
       <div className="max-w-7xl mx-auto">

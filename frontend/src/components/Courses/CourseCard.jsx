@@ -1,59 +1,134 @@
-
-import React from "react";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, BookOpen, GraduationCap, Building2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Power,
+  Users,
+  Clock,
+  User,
+  Building2,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-export default function CourseCard({ course, faculty }) {
+import Faculty from "../../lib/Faculty";
+
+export default function CourseCard({
+  course,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}) {
+  const [facultyData, setFacultyData] = useState([]);
+
+  useEffect(() => {
+    const loadFaculty = async () => {
+      const faculty = await Faculty.list();
+      setFacultyData(faculty);
+    };
+    loadFaculty();
+  }, []);
+
+  const getAssignedFacultyNames = () => {
+    if (!course.faculties || course.faculties.length === 0)
+      return ["Not Assigned"];
+    return course.faculties
+      .map((id) => {
+        const member = facultyData.find((f) => f._id === id);
+        return member ? member.name : null;
+      })
+      .filter(Boolean);
+  };
+
+  const assignedFaculty = getAssignedFacultyNames();
+
   return (
-    <Card className="relative overflow-hidden group rounded-3xl border border-gray-100 bg-white/70 backdrop-blur-md shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-50 opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="bg-white/70 backdrop-blur-sm border border-gray-100 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden group">
+        <CardHeader className="p-6 pb-4">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <Badge variant="outline" className="text-xs font-medium mb-2">
+                {course.course_id}
+              </Badge>
+              <CardTitle className="text-lg font-bold text-gray-900 leading-tight">
+                {course.name}
+              </CardTitle>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onEdit}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Course
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onToggleStatus}>
+                  <Power className="w-4 h-4 mr-2" />
+                  {course.is_active ? "Deactivate" : "Activate"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Course
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
 
-      {/* Header */}
-      <CardHeader className="relative z-10 border-b border-gray-100 pb-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-indigo-500" />
-            {course.name}
-          </h2>
-          <span
-            className={`text-xs px-3 py-1 rounded-full font-medium ${
-              
-                 "bg-green-100 text-green-700"
-                
-            }`}
+        <CardContent className="p-6 pt-0">
+          <div className="space-y-3">
+            {/* Department */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Building2 className="w-4 h-4" />
+              <span>{course.semester}</span>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <User className="w-4 h-4" />
+              <span>{assignedFaculty.join(", ")}</span>
+            </div>
+
+            {/* Credits */}
+            {course.credits && (
+              <div className="text-sm text-gray-600">
+                <strong>Credits:</strong> {course.credits}
+              </div>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="p-6 pt-4 bg-gray-50/50">
+          <Badge
+            className="bg-green-100 text-green-800 border-green-200"
+            variant="outline"
           >
             Active
-          </span>
-        </div>
-      </CardHeader>
-
-      {/* Content */}
-      <CardContent className="relative z-10 p-5 space-y-4">
-        <div className="flex items-center gap-2 text-gray-700">
-          <GraduationCap className="w-4 h-4 text-blue-500" />
-          <p className="text-base">
-            <span className="font-semibold text-gray-800">Semester:</span>{" "}
-            {course.semester || "N/A"}
-          </p>
-        </div>
-
-        {faculty && (
-          <p className="text-sm text-gray-500">
-            <span className="font-semibold text-gray-700">Faculty:</span>{" "}
-            {faculty.name || "Not Assigned"}
-          </p>
-        )}
-      </CardContent>
-
-      {/* Footer */}
-      <CardFooter className="relative z-10 border-t border-gray-100 p-4 flex justify-between items-center">
-        
-      </CardFooter>
-
-      {/* Hover glow border */}
-      <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-indigo-300 transition-all duration-500"></div>
-    </Card>
+          </Badge>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }

@@ -68,7 +68,6 @@ studentRouter.get("/courses/view/:semester", async (req,res) => {
   const {semester} = req.params;
   try {
     const courses = await Courses.find({semester:semester});
-    console.log(courses);
     if(courses){
       res.status(200).json({message:"Courses fetched !", courses});
     }else{

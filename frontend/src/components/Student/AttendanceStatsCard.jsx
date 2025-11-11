@@ -18,12 +18,12 @@ export default function AttendanceStatsCard({
   useEffect(() => {
     const loadDatas = async () => {
       const res = await axios.get(
-        `http://localhost:5001/attendance/total/marked/present/${studentId}`,
+        `${import.meta.env.VITE_API_URL}/attendance/total/marked/present/${studentId}`,
         { withCredentials: true }
       );
       const totalPresent = res.data.sessions.length;
       const sessionRes = await axios.get(
-        `http://localhost:5001/attendance/sessions/${user.semester}`,
+        `${import.meta.env.VITE_API_URL}/attendance/sessions/${user.semester}`,
         { withCredentials: true }
       );
       const totalClasses = sessionRes.data.sessions.length;
