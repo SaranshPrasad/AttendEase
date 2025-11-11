@@ -12,9 +12,9 @@ import {
   FileText,
 } from "lucide-react";
 
-import DashboardStats from "../components/dashboard/DashboardStats";
-import QuickActions from "../components/dashboard/QuickActions";
-import RecentActivity from "../components/dashboard/RecentActivity";
+import DashboardStats from "../components/Dashboard/DashboardStats";
+import QuickActions from "../components/Dashboard/QuickActions";
+import RecentActivity from "../components/Dashboard/RecentActivity";
 import { adminQuickActions } from "../lib/adminQuickActions";
 import { getStudents } from "../lib/getStudentData";
 import { getFaculty } from "../lib/getFacultyData";

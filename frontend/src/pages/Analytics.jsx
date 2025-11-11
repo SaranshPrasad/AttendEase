@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/select";
 import { BarChart3, Users, TrendingUp, Calendar } from "lucide-react";
 
-import AnalyticsHeader from "../components/analytics/AnalyticsHeader";
-import AttendanceChart from "../components/analytics/AttendanceChart";
-import AttendanceTrends from "../components/analytics/AttendanceTrends";
-import StudentPerformance from "../components/analytics/StudentPerformance";
-import DepartmentStats from "../components/analytics/DepartmentStats";
+import AnalyticsHeader from "../components/Analytics/AnalyticsHeader";
+import AttendanceChart from "../components/Analytics/AttendanceChart";
+import AttendanceTrends from "../components/Analytics/AttendanceTrends";
+import StudentPerformance from "../components/Analytics/StudentPerformance";
+import DepartmentStats from "../components/Analytics/DepartmentStats";
 
 export default function AnalyticsPage() {
   const [sessions, setSessions] = useState([]);
