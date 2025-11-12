@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const MasterFaculty = require("../models/master_faculty");
 const cookieParser = require("cookie-parser");
-const { default: Course } = require("../../../frontend/src/lib/Course");
 const Timetable = require("../models/timetable");
 const userAuth = require("../middleware/auth");
 const MasterStudent = require("../models/master_students");
